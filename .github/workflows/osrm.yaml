@@ -1,0 +1,23 @@
+name: osrm-github-actions
+on: push
+
+jobs:
+  osrm-routing:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+    steps:
+      - name: Download OSM data
+        run: |
+          wget -O ri.osm.pbf https://download.geofabrik.de/north-america/us/rhode-island-latest.osm.pbf
+         
+      - name: Setup OSRM server
+        run: |
+          sudo docker pull osrm/osrm-backend
+          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-extract -p /opt/car.lua /data/ri.osm.pbf
+          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-partition /data/ri.osrm
+          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-customize /data/ri.osrm
+          sudo docker run -t -d -p 5000:5000 -v "${PWD}:/data" osrm/osrm-backend osrm-routed --algorithm mld /data/ri.osrm
+          curl "http://127.0.0.1:5000/route/v1/driving/-71.299641,41.469936;-71.243982,41.623556?steps=false"
