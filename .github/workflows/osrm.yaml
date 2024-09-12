@@ -26,7 +26,3 @@ jobs:
         run: |
           curl "http://localhost:5000/route/v1/driving/-71.299641,41.469936;-71.243982,41.623556?steps=false"
           
-      - name: Stop OSRM server
-        run: |
-          sudo docker stop "${PWD}:/data"
-          
