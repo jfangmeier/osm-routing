@@ -9,20 +9,43 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download OSM data
+      - name: Download and crop OSM data
         run: |
-          wget -O ri.osm.pbf https://download.geofabrik.de/north-america/us/rhode-island-latest.osm.pbf
-         
+          sudo apt-get update
+          sudo apt-get install osmium-tool
+          wget -O midwest.osm.pbf https://download.geofabrik.de/north-america/us-midwest-latest.osm.pbf
+          osmium extract --strategy complete_ways --bbox -104.05788,40.37566,-86.80541,49.38436 midwest.osm.pbf -o mn-sa.osm.pbf
+
       - name: Setup OSRM server
         run: |
           sudo docker pull osrm/osrm-backend
-          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-extract -p /opt/car.lua /data/ri.osm.pbf
-          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-partition /data/ri.osrm
-          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-customize /data/ri.osrm
-          sudo docker run -t -d -p 5000:5000 -v "${PWD}:/data" osrm/osrm-backend osrm-routed --algorithm mld /data/ri.osrm
-          sleep 5
-          
+          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-extract -p /opt/car.lua /data/mn-sa.osm.pbf
+          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-partition /data/mn-sa.osrm
+          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-customize /data/mn-sa.osrm
+          sudo docker run -t -d -p 5000:5000 -v "${PWD}:/data" osrm/osrm-backend osrm-routed --algorithm mld /data/mn-sa.osrm
+          sleep 60
+
       - name: Query OSRM server
         run: |
-          curl "http://localhost:5000/route/v1/driving/-71.299641,41.469936;-71.243982,41.623556?steps=false"
+          curl "http://127.0.0.1:5000/route/v1/driving/-93.102222,44.955278;-93.488056,46.144722?steps=false"
+    
+    
+    
+    
+      # - name: Download OSM data
+      #   run: |
+      #     wget -O ri.osm.pbf https://download.geofabrik.de/north-america/us/rhode-island-latest.osm.pbf
+      #    
+      # - name: Setup OSRM server
+      #   run: |
+      #     sudo docker pull osrm/osrm-backend
+      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-extract -p /opt/car.lua /data/ri.osm.pbf
+      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-partition /data/ri.osrm
+      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-customize /data/ri.osrm
+      #     sudo docker run -t -d -p 5000:5000 -v "${PWD}:/data" osrm/osrm-backend osrm-routed --algorithm mld /data/ri.osrm
+      #     sleep 5
+      #     
+      # - name: Query OSRM server
+      #   run: |
+      #     curl "http://localhost:5000/route/v1/driving/-71.299641,41.469936;-71.243982,41.623556?steps=false"
           
