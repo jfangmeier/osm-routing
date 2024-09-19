@@ -14,10 +14,10 @@ library(tibble)
 library(purrr)
 library(osrm)
 library(sf)
-library(mapview)
+# library(mapview)
 library(fuzzyjoin)
 library(measurements)
-library(summarytools)
+# library(summarytools)
 ```
 
 ### Load MN location data
@@ -68,7 +68,9 @@ pairs_df <-
 
 ### Calculate routes
 ```{r}
-options(osrm.server = "http://localhost:5000/", osrm.profile = "car")
+if (.Platform$OS.type != "windows") {
+  options(osrm.server = "http://localhost:5000/", osrm.profile = "car")
+}
 
 route_pairs <-
   pairs_df %>% 
@@ -90,6 +92,8 @@ routes_df <-
 
 ### Map routes
 ```{r}
+#| eval: false
+
 dfSummary(
   st_drop_geometry(routes_df),
   plain.ascii  = F,
@@ -105,6 +109,8 @@ write_rds(routes_df, file = here::here("data", "routes.rds"))
 ```
 
 ```{r}
+#| eval: false
+
 routes_df %>% 
   mapview()
 ```
