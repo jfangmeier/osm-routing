@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 ---
 
 ```{r setup, include=FALSE}
-#| eval: false
+#| eval: true
 
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -16,15 +16,15 @@ library(tibble)
 library(purrr)
 library(osrm)
 library(sf)
-# library(mapview)
+library(mapview)
 library(fuzzyjoin)
 library(measurements)
-# library(summarytools)
+library(summarytools)
 ```
 
 ### Load MN location data
 ```{r}
-#| eval: false
+#| eval: true
 
 temp_dir <- tempdir()
 
@@ -44,7 +44,7 @@ remediation_sf <- st_read(file.path(temp_dir, "remediation_sites.shp"))
 
 ### Generate point pairs for routing
 ```{r}
-#| eval: false
+#| eval: true
 
 remediation_df <- 
   remediation_sf %>% 
@@ -74,7 +74,7 @@ pairs_df <-
 
 ### Calculate routes
 ```{r}
-#| eval: false
+#| eval: true
 
 if (.Platform$OS.type != "windows") {
   options(osrm.server = "http://localhost:5000/", osrm.profile = "car")
