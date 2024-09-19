@@ -19,7 +19,7 @@ jobs:
             any::tidyverse
             any::osrm
             any::sf
-            any::fuzzjoin
+            any::fuzzyjoin
             any::mapview
             any::measurements
             any::summarytools
