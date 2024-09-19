@@ -32,12 +32,15 @@ jobs:
 
       - name: Check out repository
         uses: actions/checkout@v3
-        
-      - name: Render document
-        uses: lc5415/rmarkdown-action@v1
-        with:
-          input_file: doc//osrm-routing-demo.Rmd
-	        output_format: html_document
+
+      - name: Render report with OSRM queries
+        run: Rscript -e 'rmarkdown::render(input = file.path("doc", "osrm-routing-demo.Rmd"))'
+
+#       - name: Render document
+#         uses: lc5415/rmarkdown-action@v1
+#         with:
+#           input_file: doc/osrm-routing-demo.Rmd
+# 	        output_format: html_document
         
       # - name: Download and crop OSM data
       #   run: |
