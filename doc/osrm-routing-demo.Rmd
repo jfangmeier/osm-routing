@@ -111,7 +111,7 @@ if (.Platform$OS.type != "windows") {
 
 ```
 
-### Summary data and map routes
+### Summarize data
 ```{r summary table}
 #| eval: true
 
@@ -128,7 +128,7 @@ dfSummary(
 ```
 
 ```{r show map}
-#| eval: true
+#| eval: false
 
 routes_df %>% 
   mapview()
