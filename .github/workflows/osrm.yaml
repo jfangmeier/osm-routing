@@ -16,7 +16,11 @@ jobs:
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages: |
-            any::tidyverse
+            any::dplyr
+            any::tidyr
+            any::readr
+            any::tibble
+            any::purrr
             any::osrm
             any::sf
             any::fuzzyjoin
@@ -46,7 +50,7 @@ jobs:
           sleep 60
           
       - name: Render report with OSRM queries
-        run: Rscript -e 'rmarkdown::render(input = here::here("doc", "osrm-routing-demo.rmd"), output_file = here::here("doc", "osrm-routing-demo.html"))'
+        run: Rscript -e 'rmarkdown::render(input = file.path("doc", "osrm-routing-demo.Rmd"), output_file = file.path("doc", "osrm-routing-demo.html"))'
         
       - name: Commit results
         run: |
