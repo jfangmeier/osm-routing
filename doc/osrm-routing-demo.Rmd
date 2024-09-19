@@ -124,3 +124,12 @@ routes_df %>%
   mapview()
 ```
 
+```{r}
+#| eval: true
+
+if (.Platform$OS.type != "windows") {
+  system("sudo docker kill osrm/osrm-backend")
+}
+
+```
+
