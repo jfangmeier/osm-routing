@@ -1,0 +1,107 @@
+---
+title: "OSRM routing"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(osrm)
+library(sf)
+library(mapview)
+library(fuzzyjoin)
+library(measurements)
+library(summarytools)
+```
+
+### Load MN location data
+```{r}
+temp_dir <- tempdir()
+
+download.file(
+  url = "https://resources.gisdata.mn.gov/pub/gdrs/data/pub/us_mn_state_pca/env_remediation_sites/shp_env_remediation_sites.zip",
+  destfile = file.path(temp_dir, "remed_sites.zip"),
+  mode = "wb"
+)
+
+unzip(
+  zipfile = file.path(temp_dir, "remed_sites.zip"),
+  exdir = temp_dir
+)
+
+remediation_sf <- st_read(file.path(temp_dir, "remediation_sites.shp"))
+```
+
+### Generate point pairs for routing
+```{r}
+remediation_df <- 
+  remediation_sf %>% 
+  st_transform(crs = st_crs(4326)) %>% 
+  transmute(
+    project_id,
+    longitude = map_dbl(geometry, 1),
+    latitude = map_dbl(geometry, 2)
+  ) %>% 
+  st_drop_geometry() %>% 
+  tibble()
+
+set.seed(123)
+src_df <- slice_sample(remediation_df, n = 15, replace = F) %>% rename(src_id = project_id)
+set.seed(123)
+dst_df <- slice_sample(remediation_df, n = 15, replace = F) %>% rename(dst_id = project_id)
+
+pairs_df <- 
+  geo_inner_join(
+    src_df, dst_df, 
+    max_dist = 20, 
+    distance_col = "dist_haversine") %>% 
+  filter(
+    !is.na(dist_haversine), 
+    dist_haversine != 0)
+```
+
+### Calculate routes
+```{r}
+options(osrm.server = "http://localhost:5000/", osrm.profile = "car")
+
+route_pairs <-
+  pairs_df %>% 
+  # slice(1:2) %>% 
+  rowwise() %>% 
+  mutate(
+    route = osrmRoute(
+      src = c(longitude.x, latitude.x), 
+      dst = c(longitude.y, latitude.y),
+      overview = "full")
+  )
+
+routes_df <- 
+  route_pairs %>% 
+  unnest(route) %>% 
+  mutate(distance = conv_unit(distance, from = "km", to = "mi")) %>% 
+  st_set_geometry("geometry")
+```
+
+### Map routes
+```{r}
+dfSummary(
+  st_drop_geometry(routes_df),
+  plain.ascii  = F,
+  style        = 'grid',
+  graph.magnif = 0.85,
+  varnumbers = F,
+  valid.col    = F,
+  graph.col = T
+) %>% 
+  print(method = 'render')
+
+write_rds(routes_df, file = here::here("data", "routes.rds"))
+```
+
+```{r}
+routes_df %>% 
+  mapview()
+```
+

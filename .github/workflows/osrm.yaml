@@ -9,6 +9,26 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install packages
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::tidyverse
+            any::osrm
+            any::sf
+            any::fuzzjoin
+            any::mapview
+            any::measurements
+            any::summarytools
+            any::rmarkdown
+            any::here
+
+      - name: Check out repository
+        uses: actions/checkout@v3
+        
       - name: Download and crop OSM data
         run: |
           sudo apt-get update
@@ -24,28 +44,21 @@ jobs:
           sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-customize /data/mn-sa.osrm
           sudo docker run -t -d -p 5000:5000 -v "${PWD}:/data" osrm/osrm-backend osrm-routed --algorithm mld /data/mn-sa.osrm
           sleep 60
-
-      - name: Query OSRM server
+          
+      - name: Render report with OSRM queries
+        run: Rscript -e 'rmarkdown::render(input = here::here("doc", "osrm-routing-demo.rmd"), output_file = here::here("doc", "osrm-routing-demo.html"))'
+        
+      - name: Commit results
         run: |
-          curl "http://127.0.0.1:5000/route/v1/driving/-93.102222,44.955278;-93.488056,46.144722?steps=false"
-    
-    
-    
-    
-      # - name: Download OSM data
-      #   run: |
-      #     wget -O ri.osm.pbf https://download.geofabrik.de/north-america/us/rhode-island-latest.osm.pbf
-      #    
-      # - name: Setup OSRM server
-      #   run: |
-      #     sudo docker pull osrm/osrm-backend
-      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-extract -p /opt/car.lua /data/ri.osm.pbf
-      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-partition /data/ri.osrm
-      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-customize /data/ri.osrm
-      #     sudo docker run -t -d -p 5000:5000 -v "${PWD}:/data" osrm/osrm-backend osrm-routed --algorithm mld /data/ri.osrm
-      #     sleep 5
-      #     
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add data/routes.rds
+          git add doc/osrm-routing-demo.html
+          git commit -m 'Data updated' || echo "No changes to commit"
+          git push origin || echo "No changes to commit"
+
       # - name: Query OSRM server
       #   run: |
-      #     curl "http://localhost:5000/route/v1/driving/-71.299641,41.469936;-71.243982,41.623556?steps=false"
+      #     curl "http://localhost:5000/route/v1/driving/-93.102222,44.955278;-93.488056,46.144722?steps=false"
+    
           
