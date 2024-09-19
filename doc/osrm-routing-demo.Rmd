@@ -23,7 +23,7 @@ library(summarytools)
 ```
 
 ### Load MN location data
-```{r}
+```{r read data}
 #| eval: true
 
 temp_dir <- tempdir()
@@ -43,7 +43,7 @@ remediation_sf <- st_read(file.path(temp_dir, "remediation_sites.shp"))
 ```
 
 ### Generate point pairs for routing
-```{r}
+```{r generate pairs}
 #| eval: true
 
 remediation_df <- 
@@ -58,14 +58,14 @@ remediation_df <-
   tibble()
 
 set.seed(123)
-src_df <- slice_sample(remediation_df, n = 15, replace = F) %>% rename(src_id = project_id)
-set.seed(123)
-dst_df <- slice_sample(remediation_df, n = 15, replace = F) %>% rename(dst_id = project_id)
+src_df <- slice_sample(remediation_df, n = 200, replace = F) %>% rename(src_id = project_id)
+set.seed(456)
+dst_df <- slice_sample(remediation_df, n = 200, replace = F) %>% rename(dst_id = project_id)
 
 pairs_df <- 
   geo_inner_join(
     src_df, dst_df, 
-    max_dist = 20, 
+    max_dist = 40, 
     distance_col = "dist_haversine") %>% 
   filter(
     !is.na(dist_haversine), 
@@ -73,7 +73,7 @@ pairs_df <-
 ```
 
 ### Calculate routes
-```{r}
+```{r calc routes}
 #| eval: true
 
 if (.Platform$OS.type != "windows") {
@@ -82,7 +82,6 @@ if (.Platform$OS.type != "windows") {
 
 route_pairs <-
   pairs_df %>% 
-  # slice(1:2) %>% 
   rowwise() %>% 
   mutate(
     route = osrmRoute(
@@ -98,10 +97,12 @@ routes_df <-
   st_set_geometry("geometry")
 
 write_rds(routes_df, file = here::here("data", "routes.rds"))
+
+glimpse(routes_df)
 ```
 
 ### Summary data and map routes
-```{r}
+```{r summary table}
 #| eval: true
 
 dfSummary(
@@ -116,7 +117,7 @@ dfSummary(
   print(method = 'render')
 ```
 
-```{r}
+```{r show map}
 #| eval: true
 
 routes_df %>% 
