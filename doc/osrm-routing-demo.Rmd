@@ -101,6 +101,16 @@ write_rds(routes_df, file = here::here("data", "routes.rds"))
 glimpse(routes_df)
 ```
 
+```{r}
+#| eval: true
+
+if (.Platform$OS.type != "windows") {
+  system("sudo docker kill osrm")
+  system("sleep 30")
+}
+
+```
+
 ### Summary data and map routes
 ```{r summary table}
 #| eval: true
@@ -122,15 +132,5 @@ dfSummary(
 
 routes_df %>% 
   mapview()
-```
-
-```{r}
-#| eval: true
-
-if (.Platform$OS.type != "windows") {
-  system("sudo docker kill osrm")
-  system("sleep 30")
-}
-
 ```
 
