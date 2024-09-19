@@ -7,7 +7,11 @@ date: "`r Sys.Date()`"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(tibble)
+library(purrr)
 library(osrm)
 library(sf)
 library(mapview)
