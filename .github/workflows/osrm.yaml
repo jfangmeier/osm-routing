@@ -50,7 +50,7 @@ jobs:
           sleep 60
           
       - name: List dir structure
-        run: ls
+        run: Rscript -e 'system("ls")'
           
       # - name: Render report with OSRM queries
       #   run: Rscript -e 'rmarkdown::render(input = file.path("doc", "osrm-routing-demo.Rmd"), output_file = file.path("doc", "osrm-routing-demo.html"))'
