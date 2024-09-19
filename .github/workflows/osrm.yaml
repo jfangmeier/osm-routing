@@ -36,7 +36,7 @@ jobs:
       - name: Render document
         uses: lc5415/rmarkdown-action@v1
         with:
-          input_file: ./doc/osrm-routing-demo.Rmd
+          input_file: doc//osrm-routing-demo.Rmd
 	        output_format: html_document
         
       # - name: Download and crop OSM data
