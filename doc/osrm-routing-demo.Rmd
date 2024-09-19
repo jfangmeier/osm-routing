@@ -4,7 +4,7 @@ output: html_document
 date: "`r Sys.Date()`"
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 #| eval: true
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -96,11 +96,13 @@ routes_df <-
   unnest(route) %>% 
   mutate(distance = conv_unit(distance, from = "km", to = "mi")) %>% 
   st_set_geometry("geometry")
+
+write_rds(routes_df, file = here::here("data", "routes.rds"))
 ```
 
-### Map routes
+### Summary data and map routes
 ```{r}
-#| eval: false
+#| eval: true
 
 dfSummary(
   st_drop_geometry(routes_df),
@@ -112,12 +114,10 @@ dfSummary(
   graph.col = T
 ) %>% 
   print(method = 'render')
-
-write_rds(routes_df, file = here::here("data", "routes.rds"))
 ```
 
 ```{r}
-#| eval: false
+#| eval: true
 
 routes_df %>% 
   mapview()
