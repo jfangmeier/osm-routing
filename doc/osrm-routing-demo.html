@@ -371,14 +371,6 @@ unzip(
 )
 
 remediation_sf &lt;- st_read(file.path(temp_dir, &quot;remediation_sites.shp&quot;))</code></pre>
-<pre><code>## Reading layer `remediation_sites&#39; from data source 
-##   `C:\Users\Josh\AppData\Local\Temp\Rtmp04xJWC\remediation_sites.shp&#39; 
-##   using driver `ESRI Shapefile&#39;
-## Simple feature collection with 37462 features and 50 fields
-## Geometry type: POINT
-## Dimension:     XY
-## Bounding box:  xmin: 84540.03 ymin: 4816319 xmax: 754435 ymax: 5467305
-## Projected CRS: NAD83 / UTM zone 15N</code></pre>
 </div>
 <div id="generate-point-pairs-for-routing" class="section level3">
 <h3>Generate point pairs for routing</h3>
@@ -406,7 +398,6 @@ pairs_df &lt;-
   filter(
     !is.na(dist_haversine), 
     dist_haversine != 0)</code></pre>
-<pre><code>## Joining by: c(&quot;longitude&quot;, &quot;latitude&quot;)</code></pre>
 </div>
 <div id="calculate-routes" class="section level3">
 <h3>Calculate routes</h3>

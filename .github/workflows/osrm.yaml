@@ -33,24 +33,30 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
         
-      - name: Download and crop OSM data
-        run: |
-          sudo apt-get update
-          sudo apt-get install osmium-tool
-          wget -O midwest.osm.pbf https://download.geofabrik.de/north-america/us-midwest-latest.osm.pbf
-          osmium extract --strategy complete_ways --bbox -104.05788,40.37566,-86.80541,49.38436 midwest.osm.pbf -o mn-sa.osm.pbf
-
-      - name: Setup OSRM server
-        run: |
-          sudo docker pull osrm/osrm-backend
-          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-extract -p /opt/car.lua /data/mn-sa.osm.pbf
-          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-partition /data/mn-sa.osrm
-          sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-customize /data/mn-sa.osrm
-          sudo docker run -t -d -p 5000:5000 -v "${PWD}:/data" osrm/osrm-backend osrm-routed --algorithm mld /data/mn-sa.osrm
-          sleep 60
+      - name: Render document
+        uses: lc5415/rmarkdown-action@v1
+        with:
+          input_file: doc/osrm-routing-demo.Rmd
+	        output_format: html_document
+        
+      # - name: Download and crop OSM data
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install osmium-tool
+      #     wget -O midwest.osm.pbf https://download.geofabrik.de/north-america/us-midwest-latest.osm.pbf
+      #     osmium extract --strategy complete_ways --bbox -104.05788,40.37566,-86.80541,49.38436 midwest.osm.pbf -o mn-sa.osm.pbf
+      # 
+      # - name: Setup OSRM server
+      #   run: |
+      #     sudo docker pull osrm/osrm-backend
+      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-extract -p /opt/car.lua /data/mn-sa.osm.pbf
+      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-partition /data/mn-sa.osrm
+      #     sudo docker run -t -v "${PWD}:/data" osrm/osrm-backend osrm-customize /data/mn-sa.osrm
+      #     sudo docker run -t -d -p 5000:5000 -v "${PWD}:/data" osrm/osrm-backend osrm-routed --algorithm mld /data/mn-sa.osrm
+      #     sleep 60
           
-      - name: List dir structure
-        run: Rscript -e 'system("ls")'
+      # - name: List dir structure
+      #   run: Rscript -e 'system("ls")'
           
       # - name: Render report with OSRM queries
       #   run: Rscript -e 'rmarkdown::render(input = file.path("doc", "osrm-routing-demo.Rmd"), output_file = file.path("doc", "osrm-routing-demo.html"))'
