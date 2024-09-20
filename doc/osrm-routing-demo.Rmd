@@ -96,9 +96,9 @@ routes_df <-
   mutate(distance = conv_unit(distance, from = "km", to = "mi")) %>% 
   st_set_geometry("geometry")
 
-write_rds(routes_df, file = here::here("data", "routes.rds"))
-
 glimpse(routes_df)
+
+write_rds(routes_df %>% st_drop_geometry(), file = here::here("data", "routes.rds"))
 ```
 
 ```{r}
@@ -123,7 +123,7 @@ dfSummary(
   varnumbers = F,
   valid.col    = F,
   graph.col = T
-) %>% 
+) %>%
   print(method = 'render')
 ```
 
